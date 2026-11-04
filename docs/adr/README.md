@@ -17,6 +17,7 @@ We write these records in Simplified Technical English (ASD-STE100).
 | [0008](0008-do-not-use-an-orchestration-framework.md) | Do not use an orchestration framework | Accepted |
 | [0009](0009-add-a-repository-map-to-the-context.md) | Add a repository map to the context | Accepted |
 | [0010](0010-enforce-citations-and-treat-code-as-data.md) | Enforce citations, and treat code as data | Accepted |
+| [0011](0011-send-browser-calls-through-a-proxy-route.md) | Send browser calls through a proxy route | Accepted |
 
 ## Template
 

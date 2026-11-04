@@ -54,6 +54,7 @@ The system gives an answer. The answer shows the file name and the line numbers.
 | 10 | Orchestration | No framework | A short and clear pipeline shows the design better than a framework. | [0008](adr/0008-do-not-use-an-orchestration-framework.md) |
 | 11 | Context | Repository map and parent expansion | The model needs a view of the full repository before it reads one chunk. | [0009](adr/0009-add-a-repository-map-to-the-context.md) |
 | 12 | Guardrails | Citations, refusal, untrusted source code | Source code can hold an attack in a comment. We treat all code as data. | [0010](adr/0010-enforce-citations-and-treat-code-as-data.md) |
+| 13 | Browser path | A proxy route in the web app | One origin, so no CORS rules. The API address is read at request time. | [0011](adr/0011-send-browser-calls-through-a-proxy-route.md) |
 
 ## 6. Facts that we measured
 
@@ -67,6 +68,7 @@ The table shows the result of each test.
 | Does FTS5 give a BM25 score? | Yes. FTS5 is part of SQLite. | We need no extra search engine. |
 | Does tree-sitter give symbol names and line numbers? | Yes. For Python, TypeScript, TSX, and JavaScript. | Decision 8 is safe. |
 | How fast is the local embedding model? | 450 chunks each second on the CPU. 384 numbers for each vector. | A repository with 2000 chunks takes about 5 seconds. |
+| Does the stack run in containers? | Yes. `docker compose up` starts both services. The web app reaches the API. | Step 1 is complete. |
 
 ## 7. Points that stay open
 
