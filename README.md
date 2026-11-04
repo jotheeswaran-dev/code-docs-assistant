@@ -27,6 +27,7 @@ You need `uv`, Node 24, and Python 3.12.
 | `make api` | Run the API on port 8000 |
 | `make web` | Run the web app on port 3000 |
 | `make test` | Run the tests |
+| `make ingest REPO=<path>` | Cut a repository into chunks |
 | `make lint` | Check the style and the types |
 | `make help` | Show every command |
 
@@ -38,8 +39,8 @@ This repository is in progress. The table shows each step.
 |---|---|---|
 | 0 | Decisions and architecture | Done |
 | 1 | Skeleton and container setup | Done |
-| 2 | Ingest and chunk | Next |
-| 3 | Index and retrieval | Not started |
+| 2 | Ingest and chunk | Done |
+| 3 | Index and retrieval | Next |
 | 4 | Answer and guardrails | Not started |
 | 5 | Web app | Not started |
 | 6 | Evals and final document | Not started |
