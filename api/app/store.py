@@ -15,6 +15,9 @@ from app.ingest.models import Chunk
 
 EMBEDDING_SIZE = 384
 
+# Raise this when the tables change, so an old index fails with a clear message.
+SCHEMA_VERSION = "1"
+
 # A symbol match counts far more than a mention in the body.
 BM25_WEIGHTS = (10.0, 3.0, 1.0)
 
@@ -39,6 +42,14 @@ CREATE INDEX IF NOT EXISTS chunks_by_path ON chunks(path, start_line);
 CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts
 USING fts5(symbol, path, body, content='', tokenize='unicode61');
 
+CREATE TABLE IF NOT EXISTS files (
+    path     TEXT PRIMARY KEY,
+    language TEXT NOT NULL,
+    lines    INTEGER NOT NULL,
+    chunks   INTEGER NOT NULL,
+    summary  TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 """
 
@@ -46,10 +57,23 @@ _WORD = re.compile(r"[^A-Za-z0-9]+")
 _CAMEL = re.compile(r"[A-Z]+(?![a-z])|[A-Z][a-z]+|[a-z]+|\d+")
 
 
+class IndexVersionError(RuntimeError):
+    """The index on disk was built by an older version of the tables."""
+
+
 @dataclass(frozen=True, slots=True)
 class Hit:
     rowid: int
     score: float
+
+
+@dataclass(frozen=True, slots=True)
+class FileEntry:
+    path: str
+    language: str
+    lines: int
+    chunks: int
+    summary: str
 
 
 def split_identifier(text: str) -> list[str]:
@@ -83,6 +107,8 @@ class Store:
 
         if create:
             _create_tables(db)
+        else:
+            _check_version(db, target)
         return cls(db)
 
     def close(self) -> None:
@@ -94,6 +120,7 @@ class Store:
             "DROP TABLE IF EXISTS chunks;"
             "DROP TABLE IF EXISTS chunks_fts;"
             "DROP TABLE IF EXISTS chunks_vec;"
+            "DROP TABLE IF EXISTS files;"
             "DROP TABLE IF EXISTS meta;"
         )
         _create_tables(self._db)
@@ -145,6 +172,31 @@ class Store:
             [(start + offset, struct.pack(f"{len(v)}f", *v)) for offset, v in enumerate(vectors)],
         )
         self._db.commit()
+
+    def write_files(self, entries: Sequence[FileEntry]) -> None:
+        self._db.executemany(
+            "INSERT OR REPLACE INTO files (path, language, lines, chunks, summary)"
+            " VALUES (?,?,?,?,?)",
+            [(e.path, e.language, e.lines, e.chunks, e.summary) for e in entries],
+        )
+        self._db.commit()
+
+    def files(self) -> list[FileEntry]:
+        rows = self._db.execute(
+            "SELECT path, language, lines, chunks, summary FROM files ORDER BY path"
+        ).fetchall()
+        return [FileEntry(*row) for row in rows]
+
+    def parent_of(self, chunk: Chunk) -> Chunk | None:
+        """The class or module header that encloses a chunk."""
+        if not chunk.parent:
+            return None
+        row = self._db.execute(
+            "SELECT * FROM chunks WHERE path = ? AND symbol = ? AND kind IN ('class','module')"
+            " ORDER BY start_line LIMIT 1",
+            (chunk.path, chunk.parent),
+        ).fetchone()
+        return _to_chunk(row) if row else None
 
     def set_meta(self, key: str, value: str) -> None:
         self._db.execute("INSERT OR REPLACE INTO meta (key, value) VALUES (?,?)", (key, value))
@@ -199,7 +251,25 @@ def _create_tables(db: sqlite3.Connection) -> None:
         f"CREATE VIRTUAL TABLE IF NOT EXISTS chunks_vec "
         f"USING vec0(embedding float[{EMBEDDING_SIZE}])"
     )
+    db.execute(
+        "INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', ?)",
+        (SCHEMA_VERSION,),
+    )
     db.commit()
+
+
+def _check_version(db: sqlite3.Connection, path: Path) -> None:
+    try:
+        row = db.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()
+    except sqlite3.Error:
+        row = None
+    found = row["value"] if row else "0"
+    if found != SCHEMA_VERSION:
+        db.close()
+        raise IndexVersionError(
+            f"The index at {path} uses tables version {found}, and this build needs "
+            f"version {SCHEMA_VERSION}. Build it again with: make ingest REPO=<path>"
+        )
 
 
 def _to_chunk(row: sqlite3.Row) -> Chunk:

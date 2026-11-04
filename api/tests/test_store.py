@@ -1,7 +1,7 @@
 import pytest
 
 from app.ingest.models import Chunk
-from app.store import EMBEDDING_SIZE, Store, split_identifier
+from app.store import EMBEDDING_SIZE, IndexVersionError, Store, split_identifier
 
 
 def vector(slot: int) -> list[float]:
@@ -109,3 +109,14 @@ def test_it_splits_an_identifier():
     assert split_identifier("retry_with_backoff") == ["retry", "with", "backoff"]
     assert split_identifier("retryWithBackoff") == ["retrywithbackoff", "retry", "with", "backoff"]
     assert split_identifier("HTTPServer") == ["httpserver", "http", "server"]
+
+
+def test_an_old_index_fails_with_a_clear_message(tmp_path):
+    path = tmp_path / "old.db"
+    made = Store.open(path, create=True)
+    made._db.execute("UPDATE meta SET value = '0' WHERE key = 'schema_version'")
+    made._db.commit()
+    made.close()
+
+    with pytest.raises(IndexVersionError, match="make ingest"):
+        Store.open(path)
