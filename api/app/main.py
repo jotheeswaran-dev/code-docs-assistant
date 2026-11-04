@@ -1,14 +1,20 @@
 from __future__ import annotations
 
+import json
 import time
+from collections.abc import Iterator
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app import __version__
+from app.answer.claude import ClaudeAnswerer
+from app.answer.pipeline import answer
 from app.config import Settings, get_settings
 from app.retrieval.search import search
-from app.store import Store
+from app.store import IndexVersionError, Store
 
 
 class Health(BaseModel):
@@ -46,6 +52,11 @@ class SearchResponse(BaseModel):
     hits: list[Hit]
 
 
+class ChatRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=2000)
+    limit: int = Field(default=8, ge=1, le=20)
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     app = FastAPI(title="Code Documentation Assistant", version=__version__)
@@ -55,7 +66,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         chunks, source = None, None
         try:
             store = Store.open(settings.store_path)
-        except (FileNotFoundError, OSError):
+        except (FileNotFoundError, OSError, IndexVersionError):
             pass
         else:
             chunks = store.count()
@@ -103,12 +114,51 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             ],
         )
 
+    @app.post("/chat")
+    def chat(request: ChatRequest) -> StreamingResponse:
+        if not settings.anthropic_api_key:
+            raise HTTPException(
+                status_code=503,
+                detail="No ANTHROPIC_API_KEY. The answer step needs a key. Search still works.",
+            )
+        store = _open_index(settings)
+        answerer = ClaudeAnswerer(settings)
+
+        def events() -> Iterator[str]:
+            try:
+                for event in answer(
+                    store, settings, request.question, answerer, limit=request.limit
+                ):
+                    yield _sse(event)
+                yield _sse({"type": "done"})
+            except Exception as error:  # noqa: BLE001 - the stream must report, not crash
+                yield _sse({"type": "error", "message": _redact(str(error), settings)})
+            finally:
+                store.close()
+
+        return StreamingResponse(
+            events(),
+            media_type="text/event-stream",
+            headers={"cache-control": "no-cache", "x-accel-buffering": "no"},
+        )
+
     return app
+
+
+def _sse(event: dict[str, Any]) -> str:
+    return f"data: {json.dumps(event)}\n\n"
+
+
+def _redact(message: str, settings: Settings) -> str:
+    key = settings.anthropic_api_key
+    return message.replace(key, "***") if key else message
 
 
 def _open_index(settings: Settings) -> Store:
     try:
         return Store.open(settings.store_path)
+    except IndexVersionError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
     except (FileNotFoundError, OSError) as error:
         raise HTTPException(
             status_code=503,
