@@ -206,6 +206,7 @@ def test_the_pipeline_reports_sources_then_text_then_a_trace(store, monkeypatch)
     assert kinds[-1] == "trace"
 
     trace = events[-1]["trace"]
+    assert trace["sources"][0]["lexical_rank"] or trace["sources"][0]["vector_rank"]
     assert trace["usage"]["cache_read_tokens"] == 800
     assert trace["cost_usd"] > 0
     assert trace["sources"]

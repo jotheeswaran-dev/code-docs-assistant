@@ -38,6 +38,9 @@ class Source:
     id: str
     chunk: Chunk
     enclosing: Chunk | None = None
+    score: float = 0.0
+    lexical_rank: int | None = None
+    vector_rank: int | None = None
 
     @property
     def label(self) -> str:
@@ -56,7 +59,14 @@ def pack(
 
     for result in results:
         enclosing = store.parent_of(result.chunk)
-        candidate = Source(id=f"c{len(sources) + 1}", chunk=result.chunk, enclosing=enclosing)
+        candidate = Source(
+            id=f"c{len(sources) + 1}",
+            chunk=result.chunk,
+            enclosing=enclosing,
+            score=result.score,
+            lexical_rank=result.lexical_rank,
+            vector_rank=result.vector_rank,
+        )
         size = len(_render_one(candidate, include_imports=result.chunk.path not in seen_imports))
         if sources and used + size > budget_chars:
             break

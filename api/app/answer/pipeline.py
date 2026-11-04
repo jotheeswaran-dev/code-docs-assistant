@@ -188,4 +188,7 @@ def _source_row(source: Source) -> dict[str, Any]:
         "label": chunk.label,
         "text": chunk.text,
         "enclosing": source.enclosing.text if source.enclosing else None,
+        "score": round(source.score, 6),
+        "lexical_rank": source.lexical_rank,
+        "vector_rank": source.vector_rank,
     }
