@@ -59,6 +59,7 @@ The system gives an answer. The answer shows the file name and the line numbers.
 | 15 | Repository map | Built from the chunks, with no model call | The ingest step keeps its rule: no key. The map is free and the same on every run. | [0009](adr/0009-add-a-repository-map-to-the-context.md) |
 | 16 | Citation check | Report a claim with no proof, do not delete it | A deleted sentence hides information from the reader. | [0010](adr/0010-enforce-citations-and-treat-code-as-data.md) |
 | 17 | Answer transport | Server-sent events | The sources arrive first, then the text, then the trace. | [0013](adr/0013-stream-the-answer-over-server-sent-events.md) |
+| 18 | Answer rendering | Our own markdown subset, with highlight.js for colour | A citation must be a button inside the prose, and a stream gives a part of a document. | [0014](adr/0014-render-a-markdown-subset-in-the-web-app.md) |
 
 ## 6. Facts that we measured
 
