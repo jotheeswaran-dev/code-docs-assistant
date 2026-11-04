@@ -30,8 +30,12 @@ def ingest(root: Path) -> tuple[list[Chunk], Counter[str], Counter[str]]:
     return chunks, languages, skipped
 
 
+def _is_url(source: str) -> bool:
+    return source.startswith(("http://", "https://", "git@"))
+
+
 def _resolve(source: str, stack: list[tempfile.TemporaryDirectory[str]]) -> Path:
-    if not source.startswith(("http://", "https://", "git@")):
+    if not _is_url(source):
         root = Path(source).expanduser().resolve()
         if not root.is_dir():
             raise SystemExit(f"error: {root} is not a directory")
@@ -67,7 +71,8 @@ def main(argv: list[str] | None = None) -> int:
     store.clear()
     store.write(chunks, vectors)
     store.write_files(repo_map.build(chunks))
-    store.set_meta("source", str(root))
+    # A clone lands in a temporary folder with a random name. Keep the name a reader knows.
+    store.set_meta("source", args.source if _is_url(args.source) else str(root))
     store.set_meta("chunks", str(len(chunks)))
     store.set_meta("embedding_model", model_name())
     store.set_meta("indexed_at", datetime.now(UTC).isoformat(timespec="seconds"))

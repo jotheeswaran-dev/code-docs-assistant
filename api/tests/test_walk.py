@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from app.ingest.cli import _is_url
 from app.ingest.languages import detect
 from app.ingest.walk import load
 
@@ -47,3 +48,10 @@ def test_it_names_the_language():
     assert detect("lib/store.rb") == "ruby"
     assert detect("Gemfile") == "ruby"
     assert detect("README.md") is None
+
+
+def test_it_knows_a_url_from_a_path():
+    assert _is_url("https://github.com/psf/requests")
+    assert _is_url("git@github.com:psf/requests.git")
+    assert not _is_url("/Users/me/code/project")
+    assert not _is_url("~/code/project")
