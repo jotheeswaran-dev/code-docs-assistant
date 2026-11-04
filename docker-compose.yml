@@ -3,6 +3,9 @@ services:
     build: ./api
     environment:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      # The index is built on the host. The container reads the same file.
+      - ./data:/srv/data
     ports:
       - "8000:8000"
     healthcheck:

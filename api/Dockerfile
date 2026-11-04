@@ -14,5 +14,11 @@ RUN uv sync --frozen --no-dev
 
 COPY app ./app
 
+# The build downloads the embedding model, so the container needs no network at run time.
+ENV EMBEDDING_CACHE=/srv/.models \
+    HF_HUB_OFFLINE=1
+RUN HF_HUB_OFFLINE=0 python -c \
+    "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5', cache_dir='/srv/.models')"
+
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
