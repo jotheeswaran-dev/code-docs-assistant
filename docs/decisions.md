@@ -72,11 +72,15 @@ The table shows the result of each test.
 | Does the stack run in containers? | Yes. `docker compose up` starts both services. The web app reaches the API. | Step 1 is complete. |
 | Does the chunker work on a real repository? | 354 files gave 2453 chunks in 0.22 seconds. 731 chunks carry a symbol name. | Step 2 is complete. |
 | Does a key reach the index? | No. The walker skips a file that looks like a key, and a test holds that rule. | The risk in ADR 0010 has a control. |
+| How fast is the real embedding step? | 12.5 chunks each second. 2453 chunks take about 200 seconds. | The first measure of 450 each second was wrong. ADR 0004 holds the correction. |
+| Does the join beat one search alone? | Yes. Each search made a first-place fault that the other corrected. | ADR 0007 holds the three questions and the results. |
+| How fast is one search? | 82 milliseconds. That time holds both searches and the question vector. | Fast enough for a chat reply. |
 
 ## 7. Points that stay open
 
 | Point | Plan |
 |---|---|
-| Reranker model | We do not add one. RRF is enough for the first version. |
+| Reranker model | We do not add one. RRF is enough for the first version. The eval step will test this. |
+| Index speed | 200 seconds for 2453 chunks. A GPU or a hosted model is the next step for a large repository. |
 | More languages | Bash, Lua, and Markdown use a line window now. A parser for each is a short list of node names. |
 | Production database | We keep the SQLite interface small. ADR 0005 shows the move to pgvector. |

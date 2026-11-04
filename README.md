@@ -12,10 +12,16 @@ You need Docker. The answer step also needs an Anthropic API key.
 
 1. Copy the example file. Run `cp .env.example .env`.
 2. Put your key in `.env`.
-3. Run `make up`.
-4. Open `http://localhost:3000`.
+3. Index a repository. Run `make ingest REPO=<path or git url>`.
+4. Run `make up`.
+5. Open `http://localhost:3000`.
 
-The page shows the service status. It states if the key is set.
+The page shows the service status. It states if the key is set, and which repository
+the index holds.
+
+The ingest step runs on the host and writes `data/store.db`. The container reads the
+same file. A repository of 354 files takes about three minutes, and almost all of that
+time is the embedding step.
 
 ## Work on it
 
@@ -27,7 +33,7 @@ You need `uv`, Node 24, and Python 3.12.
 | `make api` | Run the API on port 8000 |
 | `make web` | Run the web app on port 3000 |
 | `make test` | Run the tests |
-| `make ingest REPO=<path>` | Cut a repository into chunks |
+| `make ingest REPO=<path>` | Index a repository |
 | `make lint` | Check the style and the types |
 | `make help` | Show every command |
 
@@ -40,8 +46,8 @@ This repository is in progress. The table shows each step.
 | 0 | Decisions and architecture | Done |
 | 1 | Skeleton and container setup | Done |
 | 2 | Ingest and chunk | Done |
-| 3 | Index and retrieval | Next |
-| 4 | Answer and guardrails | Not started |
+| 3 | Index and retrieval | Done |
+| 4 | Answer and guardrails | Next |
 | 5 | Web app | Not started |
 | 6 | Evals and final document | Not started |
 

@@ -18,13 +18,27 @@ We must also embed every chunk of a repository. A hosted model would cost money 
 We use `BAAI/bge-small-en-v1.5`. It runs on the local CPU through the `fastembed` library.
 The library uses ONNX. It does not need PyTorch.
 
-We tested the model before this decision:
+We tested the model before this decision. That first test was wrong.
+It sent one short string many times, and it gave 450 chunks each second.
+
+A later test used real chunks from the test repository. A chunk holds 2221 characters
+on average. A chunk of that size fills the 512 token limit of the model.
 
 | Measure | Result |
 |---|---|
 | Vector size | 384 numbers |
-| Speed | 450 chunks each second, on the CPU |
-| Time for 2000 chunks | About 5 seconds |
+| Speed, one short string | 450 chunks each second (not a real workload) |
+| Speed, real code chunks | 12.5 chunks each second, on a machine with 11 cores |
+| Time for 2453 chunks | About 200 seconds |
+
+We tried two ways to make it faster. We measured both. Both were slower.
+
+| Change | Result | Reason |
+|---|---|---|
+| Worker processes | 3.3 chunks each second | ONNX already uses many threads. Each worker loads the model again. |
+| Sort the chunks by length | 8.0 chunks each second | The library already groups a batch well. The sort only moved work. |
+
+We keep the default settings of the library.
 
 ## Consequences
 
@@ -32,13 +46,14 @@ We tested the model before this decision:
 
 - The reviewer needs one key only. The ingest step needs no key at all.
 - The ingest step costs nothing. We can ingest a repository many times during a test.
-- The ingest step is fast. A network call for each batch would be slower.
 - The container holds the model. The system works without the internet after the build.
+- The ingest step runs one time. It writes a file, and every later question reads that file.
 
 ### Bad
 
 - The model is small. A large hosted model would give a better match for the meaning.
 - The container image grows by about 150 MB.
+- The ingest step takes about 200 seconds for 2453 chunks. A hosted model with a GPU would be faster.
 
 ### Risk and control
 
@@ -46,6 +61,7 @@ We tested the model before this decision:
 |---|---|
 | The small model gives a weak match. | Word search runs beside the vector search. For code, the word search does much of the work. |
 | The first run downloads the model. | The container build step downloads the model. The run step needs no download. |
+| A large repository takes too long to index. | The index is a file. It is built one time and then read many times. A GPU or a hosted model is the next step. |
 
 ## Options that we rejected
 
