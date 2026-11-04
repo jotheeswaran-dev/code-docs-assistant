@@ -39,8 +39,11 @@ We ran the check against real answers. It found three faults of its own.
 | A file name ended a claim | `fresh-install-of-osx.sh` became two claims, and the citation stayed with the second | One line of prose is one claim. The check does not cut a line at a full stop. |
 | A method call ended a claim | `EnvVars::HOMEBREW_PREFIX.join('bin')` cut the line in the same way | Inline code is masked before the check reads the line. |
 | A heading counted as a claim | `### What the startup actually performs` | A heading names a section and states no fact, so the check skips it. |
+| A lead-in counted as a claim | `What the sources actually show:` | A line that ends with a colon introduces a list, so the check skips it. |
 
-The first run reported 4 faults on one answer, and all 4 were wrong.
+The eval set measures this check over 12 answers. The score moved from 5 clean to 8
+clean once the lead-in rule landed. The first run reported 4 faults on one answer, and
+all 4 were wrong.
 After the change, the same answer reports none, and a later answer still caught a
 true fault: a summary line that stated a fact with no citation.
 

@@ -54,6 +54,8 @@ You need `uv`, Node 24, and Python 3.12.
 | `make web` | Run the web app on port 3000 |
 | `make test` | Run the tests |
 | `make ingest REPO=<path>` | Index a repository |
+| `make eval` | Measure retrieval. Free, no model call |
+| `make eval-answers` | Also ask the model and grade each answer. About $0.70 |
 | `make lint` | Check the style and the types |
 | `make help` | Show every command |
 
@@ -68,8 +70,8 @@ This repository is in progress. The table shows each step.
 | 2 | Ingest and chunk | Done |
 | 3 | Index and retrieval | Done |
 | 4 | Answer and guardrails | Done |
-| 5 | Web app | Next |
-| 6 | Evals and final document | Not started |
+| 5 | Web app | Done |
+| 6 | Evals and the final document | Done |
 
 ## Layout
 
@@ -85,6 +87,7 @@ This repository is in progress. The table shows each step.
 |---|---|
 | [docs/decisions.md](docs/decisions.md) | Every decision, the reason, and the facts that we measured. |
 | [docs/architecture.md](docs/architecture.md) | The parts of the system and the flow diagrams. |
+| [docs/evidence.md](docs/evidence.md) | Every number that we measured. |
 | [docs/adr/](docs/adr/) | One Architecture Decision Record for each important decision. |
 
 ## Language of the documents
@@ -92,9 +95,27 @@ This repository is in progress. The table shows each step.
 We write the documents in Simplified Technical English (ASD-STE100).
 Sentences are short. The voice is active. One word has one meaning.
 
+## Quality
+
+`make eval` asks 15 fixed questions about `psf/requests`. Twelve have an answer in the
+repository. Three do not, and the system must refuse those.
+
+| Search | recall@1 | recall@3 | recall@5 | recall@8 |
+|---|---|---|---|---|
+| Word only | 0.67 | 0.83 | 0.92 | 0.92 |
+| Vector only | 0.58 | 0.92 | 0.92 | 0.92 |
+| Joined with RRF | 0.67 | **1.00** | **1.00** | **1.00** |
+
+| Answers | Result |
+|---|---|
+| Faithful to the sources | 12 of 12 |
+| Every claim carries a citation | 8 of 12 |
+| Refused when it must | 3 of 3 |
+
+[docs/evidence.md](docs/evidence.md) holds every other number.
+
 ## Sections that come later
 
-- Screenshots
-- The approach to RAG, and the quality numbers from the eval run
+- Screenshots and a short video
 - The plan to move the system to a cloud provider
 - How we used AI tools, and the rules that we follow

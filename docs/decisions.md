@@ -60,6 +60,7 @@ The system gives an answer. The answer shows the file name and the line numbers.
 | 16 | Citation check | Report a claim with no proof, do not delete it | A deleted sentence hides information from the reader. | [0010](adr/0010-enforce-citations-and-treat-code-as-data.md) |
 | 17 | Answer transport | Server-sent events | The sources arrive first, then the text, then the trace. | [0013](adr/0013-stream-the-answer-over-server-sent-events.md) |
 | 18 | Answer rendering | Our own markdown subset, with highlight.js for colour | A citation must be a button inside the prose, and a stream gives a part of a document. | [0014](adr/0014-render-a-markdown-subset-in-the-web-app.md) |
+| 19 | Quality control | A fixed question set over a public repository | A number must move when the system changes. The free level needs no key. | [0015](adr/0015-measure-with-a-fixed-question-set.md) |
 
 ## 6. Facts that we measured
 
@@ -82,12 +83,18 @@ The table shows the result of each test.
 | Does the prompt cache work? | Yes. The first question writes 12701 tokens. Each later question reads the same count. | The cost for one question falls from $0.12 to about $0.04. |
 | How fast does an answer start? | The sources appear in 20 to 190 milliseconds. The first word arrives in about 2.5 seconds. | The reader never sees a blank page. See ADR 0013. |
 | Does the citation check work? | Yes, after three corrections. A real answer now reports no false fault. | ADR 0010 holds the three faults and the evidence. |
+| Does the join beat one search, with numbers? | Yes. The join reaches every target by rank 3. Neither search alone passes 0.92 at any depth. | ADR 0015 holds the table. |
+| Are the answers faithful? | 12 of 12, graded by a second model against the sources. | The guardrails in ADR 0010 hold. |
+| Does it refuse when it must? | 3 of 3, after we corrected our own grading rule. | The first score of 1 of 3 was a fault in the rule, not in the system. |
+| Do all claims carry proof? | 8 of 12 answers are clean. The rest hold an opening summary line with no citation. | An honest residual. ADR 0015 records it. |
 
 ## 7. Points that stay open
 
 | Point | Plan |
 |---|---|
-| Reranker model | We do not add one. RRF is enough for the first version. The eval step will test this. |
+| Reranker model | We do not add one. The join already reaches every target by the third result. |
 | Index speed | 200 seconds for 2453 chunks. A GPU or a hosted model is the next step for a large repository. |
+| Uncited summary lines | 4 of 12 answers open with a summary line that carries no citation. A stricter prompt rule is the next thing to try. |
+| Image size | The API image holds the model and the ONNX runtime, so it is about 1 GB. A build in two stages would cut it. |
 | More languages | Bash, Lua, and Markdown use a line window now. A parser for each is a short list of node names. |
 | Production database | We keep the SQLite interface small. ADR 0005 shows the move to pgvector. |
