@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     answer_model: str = "claude-opus-5"
     bulk_model: str = "claude-haiku-4-5"
     embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_cache: str = ".models"
     store_path: str = "data/store.db"
     log_level: str = "INFO"
 
