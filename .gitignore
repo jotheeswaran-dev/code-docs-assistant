@@ -7,6 +7,7 @@ __pycache__/
 
 # Node
 node_modules/
+.next-dev/
 # The global ignore file holds 'lib/'. This project keeps source in web/lib.
 !web/lib/
 .next/
