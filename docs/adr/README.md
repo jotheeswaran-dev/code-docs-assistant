@@ -19,6 +19,7 @@ We write these records in Simplified Technical English (ASD-STE100).
 | [0010](0010-enforce-citations-and-treat-code-as-data.md) | Enforce citations, and treat code as data | Accepted |
 | [0011](0011-send-browser-calls-through-a-proxy-route.md) | Send browser calls through a proxy route | Accepted |
 | [0012](0012-cover-every-line-once.md) | Cover every line once, with no overlap | Accepted |
+| [0013](0013-stream-the-answer-over-server-sent-events.md) | Stream the answer over server-sent events | Accepted |
 
 ## Template
 

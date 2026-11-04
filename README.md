@@ -47,8 +47,8 @@ This repository is in progress. The table shows each step.
 | 1 | Skeleton and container setup | Done |
 | 2 | Ingest and chunk | Done |
 | 3 | Index and retrieval | Done |
-| 4 | Answer and guardrails | Next |
-| 5 | Web app | Not started |
+| 4 | Answer and guardrails | Done |
+| 5 | Web app | Next |
 | 6 | Evals and final document | Not started |
 
 ## Layout

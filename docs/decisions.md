@@ -56,6 +56,9 @@ The system gives an answer. The answer shows the file name and the line numbers.
 | 12 | Guardrails | Citations, refusal, untrusted source code | Source code can hold an attack in a comment. We treat all code as data. | [0010](adr/0010-enforce-citations-and-treat-code-as-data.md) |
 | 13 | Browser path | A proxy route in the web app | One origin, so no CORS rules. The API address is read at request time. | [0011](adr/0011-send-browser-calls-through-a-proxy-route.md) |
 | 14 | Chunk coverage | Every line in one chunk, with no overlap | The index holds no duplicate text. A search cannot return the same code twice. | [0012](adr/0012-cover-every-line-once.md) |
+| 15 | Repository map | Built from the chunks, with no model call | The ingest step keeps its rule: no key. The map is free and the same on every run. | [0009](adr/0009-add-a-repository-map-to-the-context.md) |
+| 16 | Citation check | Report a claim with no proof, do not delete it | A deleted sentence hides information from the reader. | [0010](adr/0010-enforce-citations-and-treat-code-as-data.md) |
+| 17 | Answer transport | Server-sent events | The sources arrive first, then the text, then the trace. | [0013](adr/0013-stream-the-answer-over-server-sent-events.md) |
 
 ## 6. Facts that we measured
 
@@ -75,6 +78,9 @@ The table shows the result of each test.
 | How fast is the real embedding step? | 12.5 chunks each second. 2453 chunks take about 200 seconds. | The first measure of 450 each second was wrong. ADR 0004 holds the correction. |
 | Does the join beat one search alone? | Yes. Each search made a first-place fault that the other corrected. | ADR 0007 holds the three questions and the results. |
 | How fast is one search? | 82 milliseconds. That time holds both searches and the question vector. | Fast enough for a chat reply. |
+| Does the prompt cache work? | Yes. The first question writes 12701 tokens. Each later question reads the same count. | The cost for one question falls from $0.12 to about $0.04. |
+| How fast does an answer start? | The sources appear in 20 to 190 milliseconds. The first word arrives in about 2.5 seconds. | The reader never sees a blank page. See ADR 0013. |
+| Does the citation check work? | Yes, after three corrections. A real answer now reports no false fault. | ADR 0010 holds the three faults and the evidence. |
 
 ## 7. Points that stay open
 

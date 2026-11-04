@@ -53,6 +53,7 @@ We tested this before the decision:
 |---|---|
 | A reader thinks that SQLite is not serious. | The README names the exact move to a server database. See the table below. |
 | The store must grow later. | All store calls go through one small interface. A second class can use pgvector. |
+| The tables change and an old index stays on disk. | The store writes a version number. An old index fails with the exact command to build it again. |
 | A rebuild fails on the word index. | An FTS5 table with no stored content refuses `DELETE` once it holds rows. The store drops the tables and builds them again. A test holds this rule. |
 
 ## The move to a server database
