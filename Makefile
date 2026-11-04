@@ -1,7 +1,10 @@
 # The index to build and to serve. Override it to keep one index for each repository.
 DB ?= data/store.db
 
-.PHONY: help setup test lint fmt api web ingest indexes up down clean
+# The eval set asks about this repository.
+EVAL_DB ?= data/requests.db
+
+.PHONY: help setup test lint fmt api web ingest indexes eval eval-answers up down clean
 
 help: ## Show this help
 	@grep -hE '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed -e 's/:.*## /\t/' | expand -t 12
@@ -31,6 +34,12 @@ ifndef REPO
 	$(error Set REPO. For example: make ingest REPO=~/.config/dotfiles)
 endif
 	PYTHONPATH=api uv run --project api python -m app.ingest.cli "$(REPO)" --db "$(DB)"
+
+eval: ## Measure retrieval against the golden questions. Free, no model call
+	PYTHONPATH=api uv run --project api python -m app.evals.run --db "$(EVAL_DB)"
+
+eval-answers: ## Also ask the model and grade each answer. This costs money
+	PYTHONPATH=api uv run --project api python -m app.evals.run --db "$(EVAL_DB)" --answers
 
 indexes: ## List the indexes that have been built
 	@ls -lh data/*.db 2>/dev/null || echo "No index yet. Run: make ingest REPO=<path or url>"
