@@ -6,6 +6,22 @@ The system reads a Git repository. It cuts each source file into chunks on funct
 class limits. It finds the related chunks for a question. It sends those chunks to Claude.
 Every sentence in the answer points back to the code that proves it.
 
+## Demo
+
+[demo/code-assistant-demo.mp4](demo/code-assistant-demo.mp4) is a recording of the
+system, about five minutes long.
+
+Each answer carries a citation. A click on a citation opens the code at the exact
+lines, with the enclosing class above it. The two small marks on a source, such as
+`w1 v8`, are its rank in the word search and in the vector search.
+
+![The answer, and the code that proves it](demo/screenshot-sources.png)
+
+The trace holds the time, the tokens, the cache reads, the cost, and every line that
+states a fact with no citation.
+
+![The trace for one answer](demo/screenshot-trace.png)
+
 ## Run it
 
 You need Docker. The answer step also needs an Anthropic API key.
