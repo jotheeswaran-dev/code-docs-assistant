@@ -88,6 +88,7 @@ This repository is in progress. The table shows each step.
 | [docs/decisions.md](docs/decisions.md) | Every decision, the reason, and the facts that we measured. |
 | [docs/architecture.md](docs/architecture.md) | The parts of the system and the flow diagrams. |
 | [docs/evidence.md](docs/evidence.md) | Every number that we measured. |
+| [docs/productionisation.md](docs/productionisation.md) | What stops this build from serving real users, and the order in which we would fix it. |
 | [docs/adr/](docs/adr/) | One Architecture Decision Record for each important decision. |
 
 ## Language of the documents
@@ -117,5 +118,4 @@ repository. Three do not, and the system must refuse those.
 ## Sections that come later
 
 - Screenshots and a short video
-- The plan to move the system to a cloud provider
 - How we used AI tools, and the rules that we follow
