@@ -1,0 +1,6 @@
+# For readers who use mise. It pins the tools that the Makefile calls.
+# Anyone else may install uv and Node by any means. See the README.
+[tools]
+uv = "0.9.6"
+node = "24"
+python = "3.12"

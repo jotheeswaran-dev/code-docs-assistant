@@ -6,24 +6,36 @@ EVAL_DB ?= data/requests.db
 
 .PHONY: help setup test lint fmt api web ingest indexes eval eval-answers up down clean
 
+# Fail with a clear message rather than a shim error from a version manager.
+REQUIRE_UV = @command -v uv >/dev/null || { \
+	echo "error: 'uv' is not on PATH."; \
+	echo "  install it:  curl -LsSf https://astral.sh/uv/install.sh | sh"; \
+	echo "  with mise:   mise install  (this project pins uv in mise.toml)"; \
+	exit 1; }
+
 help: ## Show this help
 	@grep -hE '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed -e 's/:.*## /\t/' | expand -t 12
 
 setup: ## Install the dependencies for both services
+	$(REQUIRE_UV)
 	cd api && uv sync
 	cd web && npm install
 
 test: ## Run the tests
+	$(REQUIRE_UV)
 	cd api && uv run pytest -q
 
 lint: ## Check the style and the types
+	$(REQUIRE_UV)
 	cd api && uv run ruff check . && uv run ruff format --check .
 	cd web && npm run lint && npm run typecheck
 
 fmt: ## Format the code
+	$(REQUIRE_UV)
 	cd api && uv run ruff check --fix . && uv run ruff format .
 
 api: ## Run the API on port 8000
+	$(REQUIRE_UV)
 	STORE_PATH="$(DB)" PYTHONPATH=api uv run --project api uvicorn app.main:app --reload --port 8000
 
 web: ## Run the web app on port 3000
@@ -31,14 +43,17 @@ web: ## Run the web app on port 3000
 
 ingest: ## Index a repository. Use REPO=<path or git url>
 ifndef REPO
+	$(REQUIRE_UV)
 	$(error Set REPO. For example: make ingest REPO=~/.config/dotfiles)
 endif
 	PYTHONPATH=api uv run --project api python -m app.ingest.cli "$(REPO)" --db "$(DB)"
 
 eval: ## Measure retrieval against the golden questions. Free, no model call
+	$(REQUIRE_UV)
 	PYTHONPATH=api uv run --project api python -m app.evals.run --db "$(EVAL_DB)"
 
 eval-answers: ## Also ask the model and grade each answer. This costs money
+	$(REQUIRE_UV)
 	PYTHONPATH=api uv run --project api python -m app.evals.run --db "$(EVAL_DB)" --answers
 
 indexes: ## List the indexes that have been built

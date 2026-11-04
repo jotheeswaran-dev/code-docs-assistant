@@ -47,6 +47,10 @@ about three minutes. The index is a file, so you build it one time.
 
 You need `uv`, Node 24, and Python 3.12.
 
+Install `uv` with `curl -LsSf https://astral.sh/uv/install.sh | sh`.
+A reader who uses `mise` can run `mise install`, because `mise.toml` pins all three.
+Every command that needs `uv` checks for it first, and states how to install it.
+
 | Command | Action |
 |---|---|
 | `make setup` | Install the dependencies for both services |
