@@ -109,6 +109,7 @@ This repository is in progress. The table shows each step.
 | [docs/architecture.md](docs/architecture.md) | The parts of the system and the flow diagrams. |
 | [docs/evidence.md](docs/evidence.md) | Every number that we measured. |
 | [docs/productionisation.md](docs/productionisation.md) | What stops this build from serving real users, and the order in which we would fix it. |
+| [docs/ai-assisted-development.md](docs/ai-assisted-development.md) | How I used AI tools, what the method caught, and the rules I follow. |
 | [docs/adr/](docs/adr/) | One Architecture Decision Record for each important decision. |
 
 ## Language of the documents
@@ -135,7 +136,4 @@ repository. Three do not, and the system must refuse those.
 
 [docs/evidence.md](docs/evidence.md) holds every other number.
 
-## Sections that come later
 
-- Screenshots and a short video
-- How we used AI tools, and the rules that we follow
