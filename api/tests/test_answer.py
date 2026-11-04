@@ -122,6 +122,12 @@ def test_a_heading_is_not_a_claim():
     assert validate_citations(text, {"c1", "c2"}).clean
 
 
+def test_a_lead_in_line_is_not_a_claim():
+    """A real answer flagged this line, which only introduces the list below it."""
+    text = "What the sources actually show:\n- It is an HTTP library [c3].\n"
+    assert validate_citations(text, {"c3"}).clean
+
+
 def test_an_uncited_summary_line_is_still_caught():
     text = "**Short answer:** it comes from the Brewfile in the home directory."
     assert not validate_citations(text, {"c1"}).clean

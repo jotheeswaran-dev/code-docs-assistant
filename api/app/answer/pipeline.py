@@ -19,6 +19,7 @@ FENCED = re.compile(r"```.*?```", re.S)
 INLINE_CODE = re.compile(r"`[^`]*`")
 HEADING = re.compile(r"^\s*#{1,6}\s")
 LIST_MARKER = re.compile(r"^\s*(?:[-*+]|\d+\.)\s+")
+LEAD_IN = re.compile(r":\s*$")
 MIN_WORDS_FOR_A_CLAIM = 5
 
 NO_SOURCE_ANSWER = (
@@ -84,6 +85,8 @@ def validate_citations(text: str, known: set[str]) -> CitationReport:
         if HEADING.match(raw):
             continue  # A heading names a section. It states no fact.
         line = LIST_MARKER.sub("", INLINE_CODE.sub(" code ", raw)).strip()
+        if LEAD_IN.search(line):
+            continue  # "What the sources show:" introduces a list. It states no fact.
         if len(line.split()) < MIN_WORDS_FOR_A_CLAIM:
             continue
         claims += 1
