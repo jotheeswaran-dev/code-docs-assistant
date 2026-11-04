@@ -30,10 +30,22 @@ Each chunk carries this metadata:
 | Parent | `class Session` |
 | Imports | The import lines of the file |
 
-We tested this before the decision. tree-sitter gave the correct symbol name and the correct
-line numbers for Python, TypeScript, TSX, and JavaScript.
+A parser covers Python, TypeScript, TSX, JavaScript, and Ruby.
+We added Ruby when we chose the test repository. That repository holds 137 Ruby files.
+Without a Ruby parser, every file would fall back, and the main path would never run.
 
-A file with no parser uses a line window with an overlap.
+A file with no parser uses a line window. The window has no overlap. See ADR 0012.
+
+We tested this before the decision. tree-sitter gave the correct symbol name and the
+correct line numbers for each language. A later run on the test repository gave this result:
+
+| Measure | Result |
+|---|---|
+| Files | 354 indexed, 4 skipped |
+| Chunks | 2453 in 0.22 seconds |
+| From syntax | 731 chunks, with a symbol name |
+| From a window | 1722 chunks, for the 214 files with no parser |
+| Deepest symbol | `ResurrectRepositories.RepositoryConfig.from_hash` |
 
 ## Consequences
 
@@ -63,3 +75,4 @@ A file with no parser uses a line window with an overlap.
 | A fixed token window | Simple. But it cuts functions in the middle, which is the main problem. |
 | One chunk for each file | Always complete. But a large file fills the context window, and the citation is not exact. |
 | The Python `ast` module | No extra library. But it works for Python only. |
+| More languages now | The language pack holds a grammar for each. But each one needs a node list and a fixture, and the time budget is small. |

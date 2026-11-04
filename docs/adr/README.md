@@ -18,6 +18,7 @@ We write these records in Simplified Technical English (ASD-STE100).
 | [0009](0009-add-a-repository-map-to-the-context.md) | Add a repository map to the context | Accepted |
 | [0010](0010-enforce-citations-and-treat-code-as-data.md) | Enforce citations, and treat code as data | Accepted |
 | [0011](0011-send-browser-calls-through-a-proxy-route.md) | Send browser calls through a proxy route | Accepted |
+| [0012](0012-cover-every-line-once.md) | Cover every line once, with no overlap | Accepted |
 
 ## Template
 
