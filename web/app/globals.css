@@ -1,1 +1,77 @@
 @import "tailwindcss";
+
+/*
+ * The colours for highlight.js. We set them here rather than import a theme, so that
+ * one palette serves the light view and the dark view.
+ */
+.hljs-comment,
+.hljs-quote { color: #6e7781; font-style: italic; }
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-doctag,
+.hljs-name { color: #cf222e; }
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-meta-string { color: #0a3069; }
+
+.hljs-number,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-symbol,
+.hljs-bullet { color: #0550ae; }
+
+.hljs-title,
+.hljs-section,
+.hljs-title.function_,
+.hljs-title.class_ { color: #8250df; }
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-type,
+.hljs-built_in,
+.hljs-params { color: #953800; }
+
+.hljs-meta { color: #6e7781; }
+.hljs-deletion { color: #82071e; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 600; }
+
+@media (prefers-color-scheme: dark) {
+  .hljs-comment,
+  .hljs-quote { color: #8b949e; }
+
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-literal,
+  .hljs-doctag,
+  .hljs-name { color: #ff7b72; }
+
+  .hljs-string,
+  .hljs-regexp,
+  .hljs-addition,
+  .hljs-meta-string { color: #a5d6ff; }
+
+  .hljs-number,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-symbol,
+  .hljs-bullet { color: #79c0ff; }
+
+  .hljs-title,
+  .hljs-section,
+  .hljs-title.function_,
+  .hljs-title.class_ { color: #d2a8ff; }
+
+  .hljs-attr,
+  .hljs-attribute,
+  .hljs-type,
+  .hljs-built_in,
+  .hljs-params { color: #ffa657; }
+
+  .hljs-meta { color: #8b949e; }
+  .hljs-deletion { color: #ffa198; }
+}
