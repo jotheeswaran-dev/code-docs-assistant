@@ -1,4 +1,4 @@
-.PHONY: help setup test lint fmt api web up down clean
+.PHONY: help setup test lint fmt api web ingest up down clean
 
 help: ## Show this help
 	@grep -hE '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed -e 's/:.*## /\t/' | expand -t 12
@@ -22,6 +22,12 @@ api: ## Run the API on port 8000
 
 web: ## Run the web app on port 3000
 	cd web && npm run dev
+
+ingest: ## Cut a repository into chunks. Use REPO=<path or git url>
+ifndef REPO
+	$(error Set REPO. For example: make ingest REPO=~/.config/dotfiles)
+endif
+	PYTHONPATH=api uv run --project api python -m app.ingest.cli "$(REPO)" --out data/chunks.jsonl
 
 up: ## Build and start the containers
 	docker compose up --build
