@@ -3,6 +3,8 @@ services:
     build: ./api
     environment:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Point the container at another index that the host has built.
+      STORE_PATH: ${STORE_PATH:-data/store.db}
     volumes:
       # The index is built on the host. The container reads the same file.
       - ./data:/srv/data

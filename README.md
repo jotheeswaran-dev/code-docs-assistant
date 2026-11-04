@@ -23,6 +23,26 @@ The ingest step runs on the host and writes `data/store.db`. The container reads
 same file. A repository of 354 files takes about three minutes, and almost all of that
 time is the embedding step.
 
+## Try it on another repository
+
+The system holds one index for each repository. Build an index, then serve it.
+
+| Action | Command |
+|---|---|
+| Index a local folder | `make ingest REPO=~/code/my-project DB=data/my-project.db` |
+| Index from GitHub | `make ingest REPO=https://github.com/psf/requests DB=data/requests.db` |
+| List the indexes | `make indexes` |
+| Serve one index | `make api DB=data/requests.db` |
+| Serve one index in the container | `STORE_PATH=data/requests.db docker compose up` |
+
+`DB` has a default of `data/store.db`. Leave it out to use that one index.
+
+A Git URL clones with `--depth 1` into a temporary folder. The folder is removed once
+the index is written. Nothing from the repository enters this repository.
+
+The ingest step embeds about 12 chunks each second. A repository of 350 files takes
+about three minutes. The index is a file, so you build it one time.
+
 ## Work on it
 
 You need `uv`, Node 24, and Python 3.12.

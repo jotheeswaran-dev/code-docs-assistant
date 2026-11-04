@@ -1,4 +1,7 @@
-.PHONY: help setup test lint fmt api web ingest up down clean
+# The index to build and to serve. Override it to keep one index for each repository.
+DB ?= data/store.db
+
+.PHONY: help setup test lint fmt api web ingest indexes up down clean
 
 help: ## Show this help
 	@grep -hE '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed -e 's/:.*## /\t/' | expand -t 12
@@ -18,7 +21,7 @@ fmt: ## Format the code
 	cd api && uv run ruff check --fix . && uv run ruff format .
 
 api: ## Run the API on port 8000
-	PYTHONPATH=api uv run --project api uvicorn app.main:app --reload --port 8000
+	STORE_PATH="$(DB)" PYTHONPATH=api uv run --project api uvicorn app.main:app --reload --port 8000
 
 web: ## Run the web app on port 3000
 	cd web && npm run dev
@@ -27,7 +30,10 @@ ingest: ## Index a repository. Use REPO=<path or git url>
 ifndef REPO
 	$(error Set REPO. For example: make ingest REPO=~/.config/dotfiles)
 endif
-	PYTHONPATH=api uv run --project api python -m app.ingest.cli "$(REPO)" --db data/store.db
+	PYTHONPATH=api uv run --project api python -m app.ingest.cli "$(REPO)" --db "$(DB)"
+
+indexes: ## List the indexes that have been built
+	@ls -lh data/*.db 2>/dev/null || echo "No index yet. Run: make ingest REPO=<path or url>"
 
 up: ## Build and start the containers
 	docker compose up --build
