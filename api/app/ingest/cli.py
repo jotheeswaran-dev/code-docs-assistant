@@ -1,4 +1,4 @@
-"""Read a repository and write its chunks to a JSONL file."""
+"""Read a repository, cut it into chunks, and write the index."""
 
 from __future__ import annotations
 
@@ -9,12 +9,15 @@ import sys
 import tempfile
 import time
 from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 
 from app.ingest.chunker import chunk_file
 from app.ingest.languages import PARSED
 from app.ingest.models import Chunk
 from app.ingest.walk import load
+from app.retrieval.embedding import document_text, embed_documents, model_name
+from app.store import Store
 
 
 def ingest(root: Path) -> tuple[list[Chunk], Counter[str], Counter[str]]:
@@ -39,40 +42,58 @@ def _resolve(source: str, stack: list[tempfile.TemporaryDirectory[str]]) -> Path
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Cut a repository into chunks.")
+    parser = argparse.ArgumentParser(description="Index a repository.")
     parser.add_argument("source", help="A local path or a Git URL")
-    parser.add_argument("--out", default="data/chunks.jsonl")
+    parser.add_argument("--db", default="data/store.db")
+    parser.add_argument("--jsonl", default=None, help="Also write the chunks to this file")
     args = parser.parse_args(argv)
 
     stack: list[tempfile.TemporaryDirectory[str]] = []
     started = time.perf_counter()
     root = _resolve(args.source, stack)
-    chunks, languages, skipped = ingest(root)
-    elapsed = time.perf_counter() - started
 
+    chunks, languages, skipped = ingest(root)
     if not chunks:
         for holder in stack:
             holder.cleanup()
         raise SystemExit(f"error: {root} gave no chunks. Is it a source repository?")
+    cut = time.perf_counter()
 
-    out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with out.open("w") as handle:
-        for chunk in chunks:
-            handle.write(json.dumps(chunk.to_dict()) + "\n")
+    vectors = embed_documents([document_text(chunk) for chunk in chunks])
+    embedded = time.perf_counter()
+
+    store = Store.open(args.db, create=True)
+    store.clear()
+    store.write(chunks, vectors)
+    store.set_meta("source", str(root))
+    store.set_meta("chunks", str(len(chunks)))
+    store.set_meta("embedding_model", model_name())
+    store.set_meta("indexed_at", datetime.now(UTC).isoformat(timespec="seconds"))
+    store.close()
+    done = time.perf_counter()
+
+    if args.jsonl:
+        out = Path(args.jsonl)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("w") as handle:
+            for chunk in chunks:
+                handle.write(json.dumps(chunk.to_dict()) + "\n")
 
     parsed = sum(count for name, count in languages.items() if name in PARSED)
     total_files = sum(languages.values())
     kinds = Counter(chunk.kind for chunk in chunks)
     from_syntax = sum(count for kind, count in kinds.items() if kind != "file_part")
+    windowed = len(chunks) - from_syntax
 
     print(f"source      {root}")
     print(f"files       {total_files} indexed, {sum(skipped.values())} skipped")
     print(f"parsed      {parsed} of {total_files} files have a parser")
-    windowed = len(chunks) - from_syntax
     print(f"chunks      {len(chunks)} total, {from_syntax} from syntax, {windowed} from a window")
-    print(f"time        {elapsed:.2f}s")
-    print(f"written     {out}")
+    print(f"index       {args.db}")
+    print(
+        f"time        {cut - started:.2f}s cut, {embedded - cut:.2f}s embed, "
+        f"{done - embedded:.2f}s write"
+    )
     print()
     _table("language", languages)
     _table("chunk kind", kinds)

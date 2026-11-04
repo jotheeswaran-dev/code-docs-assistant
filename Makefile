@@ -18,16 +18,16 @@ fmt: ## Format the code
 	cd api && uv run ruff check --fix . && uv run ruff format .
 
 api: ## Run the API on port 8000
-	cd api && uv run uvicorn app.main:app --reload --port 8000
+	PYTHONPATH=api uv run --project api uvicorn app.main:app --reload --port 8000
 
 web: ## Run the web app on port 3000
 	cd web && npm run dev
 
-ingest: ## Cut a repository into chunks. Use REPO=<path or git url>
+ingest: ## Index a repository. Use REPO=<path or git url>
 ifndef REPO
 	$(error Set REPO. For example: make ingest REPO=~/.config/dotfiles)
 endif
-	PYTHONPATH=api uv run --project api python -m app.ingest.cli "$(REPO)" --out data/chunks.jsonl
+	PYTHONPATH=api uv run --project api python -m app.ingest.cli "$(REPO)" --db data/store.db
 
 up: ## Build and start the containers
 	docker compose up --build
