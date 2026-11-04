@@ -23,6 +23,9 @@ out/
 data/
 .models/
 
+# The original screen recording. The repository holds the smaller mp4 instead.
+demo/*.mov
+
 # OS
 .DS_Store
 next-env.d.ts
