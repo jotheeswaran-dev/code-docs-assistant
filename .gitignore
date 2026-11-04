@@ -7,6 +7,8 @@ __pycache__/
 
 # Node
 node_modules/
+# The global ignore file holds 'lib/'. This project keeps source in web/lib.
+!web/lib/
 .next/
 out/
 
