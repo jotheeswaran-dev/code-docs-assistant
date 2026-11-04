@@ -12,6 +12,8 @@ out/
 
 # Local data and secrets
 .env
+# The global gitignore holds '.env*'. The template must stay in the repository.
+!.env.example
 *.db
 *.db-shm
 *.db-wal
@@ -20,3 +22,5 @@ data/
 
 # OS
 .DS_Store
+next-env.d.ts
+*.tsbuildinfo
