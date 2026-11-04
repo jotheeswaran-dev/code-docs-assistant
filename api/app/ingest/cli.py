@@ -12,6 +12,7 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
+from app.answer import repo_map
 from app.ingest.chunker import chunk_file
 from app.ingest.languages import PARSED
 from app.ingest.models import Chunk
@@ -65,6 +66,7 @@ def main(argv: list[str] | None = None) -> int:
     store = Store.open(args.db, create=True)
     store.clear()
     store.write(chunks, vectors)
+    store.write_files(repo_map.build(chunks))
     store.set_meta("source", str(root))
     store.set_meta("chunks", str(len(chunks)))
     store.set_meta("embedding_model", model_name())
